@@ -1,0 +1,72 @@
+[project]
+name = "museu-scaffoldo"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "J-L Gatz",email = "elan.rgb@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "fastapi[standard] (>=0.128.0,<0.129.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.14.14,<0.15.0)",
+    "taskipy (>=1.14.1,<2.0.0)",
+    "pytest (>=9.0.2,<10.0.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)"
+]
+
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    ".pytest_cache",
+    "dist",
+    "build"
+]
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "PL",     # pylint
+    "PT",     # pydocstyle
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["museu_scaffoldo"]
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+indent-style = 'space'
+line-ending = 'auto'
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = '-p no:warnings'
+
+[tool.taskipy.tasks]
+lint = 'ruff check'
+pre_format = 'ruff check --fix'
+format = 'ruff format'
+run = 'fastapi dev museu_scaffoldo/main.py'
+pre_test = 'task lint'
+test = 'pytest -s -x --cov=museu_scaffoldo -vv'
+post_test = 'coverage html'
