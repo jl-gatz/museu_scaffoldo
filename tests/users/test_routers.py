@@ -34,9 +34,6 @@ def test_create_user(client):
         'email': 'alice@example.com',
         'password': 'secret',
     }
-    # jasao = json.dumps(jasao)
-
-    print(f'O JASAO eh {jasao}')
 
     response = client.post('/', json=jasao)  # noqa: F811
     assert response.status_code == HTTPStatus.CREATED
