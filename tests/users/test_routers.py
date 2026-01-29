@@ -34,7 +34,11 @@ def test_create_user(client):
         'email': 'alice@example.com',
         'password': 'secret',
     }
-    response = client.post('/', json=jasao)
+    # jasao = json.dumps(jasao)
+
+    print(f'O JASAO eh {jasao}')
+
+    response = client.post('/', json=jasao)  # noqa: F811
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
         'username': 'alice',
@@ -44,7 +48,7 @@ def test_create_user(client):
 
 
 def test_read_users(client):
-    response = client.get('/')
+    response = client.get('/')  # noqa: F811
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         'users': [
@@ -58,10 +62,31 @@ def test_read_users(client):
 
 
 def test_read_users_me(client):
-    response = client.get('/me')
+    response = client.get('/me')  # noqa: F811
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         'id': 1,
         'username': 'Beltrano',
         'email': 'mock@beltrano.com',
     }
+
+
+def test_update_user(client):
+    jasao = {
+        'username': 'bob',
+        'email': 'bob@example.com',
+        'password': 'mynewpassword',
+    }
+    response = client.put('/1', json=jasao)  # noqa: F811
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': 1,
+        'username': 'bob',
+        'email': 'bob@example.com',
+    }
+
+
+def test_delete_user(client):
+    response = client.delete('/1')
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {'message': 'Usuário deletado com sucesso!'}
