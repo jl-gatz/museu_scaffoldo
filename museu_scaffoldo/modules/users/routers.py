@@ -4,18 +4,18 @@ from fastapi import APIRouter, Depends
 
 from museu_scaffoldo.modules.users.deps import get_current_user
 
-from .schemas import MessageSchema, UserDB, UserPublic, UserSchema
+from .schemas import UserDB, UserList, UserPublic, UserSchema
 
-router_user = APIRouter(prefix='/users', tags=['Users'])
+router_user = APIRouter()
 
 
 # Teste com database falso
 database = []
 
 
-@router_user.get('/', status_code=HTTPStatus.OK, response_model=MessageSchema)
+@router_user.get('/', status_code=HTTPStatus.OK, response_model=UserList)
 def read_users():
-    return {'message': 'Olá, mundo!'}
+    return {'users': database}
 
 
 @router_user.get('/me', status_code=HTTPStatus.OK, response_model=UserPublic)
@@ -28,4 +28,10 @@ def read_user_me(current_user: dict = Depends(get_current_user)):
 )
 def create_user(user: UserSchema):
     user_with_id = UserDB(**user.model_dump(), id=len(database) + 1)
+    database.append(user_with_id)
     return user_with_id
+
+
+@router_user.put('/{user_id}', response_model=UserPublic)
+def update_user(user_id: int, user: UserSchema):
+    pass

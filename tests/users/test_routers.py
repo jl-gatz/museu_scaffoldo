@@ -28,19 +28,13 @@ def override_get_current_user():
 app.dependency_overrides[get_current_user] = override_get_current_user
 
 
-def test_read_users(client):
-    response = client.get('/users/')
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {'message': 'Olá, mundo!'}
-
-
 def test_create_user(client):
     jasao = {
         'username': 'alice',
         'email': 'alice@example.com',
         'password': 'secret',
     }
-    response = client.post('/users/', json=jasao)
+    response = client.post('/', json=jasao)
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
         'username': 'alice',
@@ -49,8 +43,22 @@ def test_create_user(client):
     }
 
 
+def test_read_users(client):
+    response = client.get('/')
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'users': [
+            {
+                'id': 1,
+                'username': 'alice',
+                'email': 'alice@example.com',
+            }
+        ]
+    }
+
+
 def test_read_users_me(client):
-    response = client.get('users/me')
+    response = client.get('/me')
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         'id': 1,

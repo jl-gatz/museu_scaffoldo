@@ -1,22 +1,12 @@
 # main.py
 from fastapi import FastAPI
 
-from museu_scaffoldo.modules.equipamentos.routers import (
-    router_equipamento as equipamentos_router,
-)
-from museu_scaffoldo.modules.users.routers import router_user as users_router
-from museu_scaffoldo.modules.visitas.routers import (
-    router_visita as visitas_router,
-)
+from museu_scaffoldo.core.api.v1.routers import router
 
 app = FastAPI(title='API do Museu de Informática')
 
 # Incluindo as rotas dos apps com prefixos
-app.include_router(users_router)
-app.include_router(
-    equipamentos_router, prefix='/equipamentos', tags=['Equipamentos']
-)
-app.include_router(visitas_router, prefix='/visitas', tags=['Visitas'])
+app.include_router(router, prefix='/api/v1', tags=['v1'])
 
 
 @app.get('/')
@@ -26,9 +16,9 @@ def health_check():
     visitas_service = None
     equips_service = None
 
-    users_api = users_router.get('/')
-    visitas_api = visitas_router.get('/')
-    equips_api = equipamentos_router.get('/')
+    users_api = router.get('/users/')
+    visitas_api = router.get('/visitas/')
+    equips_api = router.get('/equipamentos/')
 
     if users_api:
         user_service = 'ok'
@@ -39,7 +29,6 @@ def health_check():
     if equips_api:
         equips_service = 'ok'
 
-    print(users_api)
     return {
         'status': 'ok',
         'API users': f'O serviço de usuários está {user_service}',

@@ -7,7 +7,6 @@ class UserSchema(BaseModel):
     password: str
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
 
@@ -17,9 +16,9 @@ class UserPublic(BaseModel):
     email: EmailStr
 
 
+class UserList(BaseModel):
+    users: list[UserPublic]
+
+
 class UserDB(UserSchema):
     id: int
-
-
-class MessageSchema(BaseModel):
-    message: str
