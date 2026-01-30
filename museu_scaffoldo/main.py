@@ -6,7 +6,7 @@ from museu_scaffoldo.core.api.v1.routers import router
 app = FastAPI(title='API do Museu de Informática')
 
 # Incluindo as rotas dos apps com prefixos
-app.include_router(router, prefix='/api/v1', tags=['v1'])
+app.include_router(router, prefix='/api/v1')
 
 
 @app.get('/')

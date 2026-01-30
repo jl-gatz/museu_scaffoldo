@@ -70,3 +70,10 @@ run = 'fastapi dev museu_scaffoldo/main.py'
 pre_test = 'task lint'
 test = 'pytest -s -x --cov=museu_scaffoldo -vv'
 post_test = 'coverage html'
+
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.14.1"
+ruff = "^0.14.14"
+pytest = "^9.0.2"
+pytest-cov = "^7.0.0"
+
