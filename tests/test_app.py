@@ -12,12 +12,11 @@ def client():
 
 
 def test_read_root(client):
-    response = client.get('/')
+    response = client.get("/")
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'status': 'ok',
-        'API users': 'O serviço de usuários está ok',
-        'API equipamentos': 'O serviço de equipamentos está ok',
-        'API visitas': 'O serviço de visitas está ok',
-        'message': 'API rodando com sucesso!',
+        "status": "ok",
+        "API_users": "O serviço de usuários está ok",
+        "API_equipamentos": "O serviço de equipamentos está ok",
+        "API_visitas": "O serviço de visitas está ok",
     }

@@ -25,9 +25,9 @@ class UserDB(UserSchema):
 
     def to_dict(self) -> dict[str, str]:
         return {
-            'id': str(self.id),
-            'username': self.username,
-            'email': self.email,
+            "id": str(self.id),
+            "username": self.username,
+            "email": self.email,
         }
 
 
