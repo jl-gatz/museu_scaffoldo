@@ -18,6 +18,18 @@ def read_users():
     return {'users': database}
 
 
+@router_user.get(
+    '/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
+)
+def read_user_by_id(user_id: int):
+    if user_id > len(database) or user_id < 1:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado'
+        )
+    user_with_id = database[user_id - 1]
+    return user_with_id
+
+
 @router_user.get('/me', status_code=HTTPStatus.OK, response_model=UserPublic)
 def read_user_me(current_user: dict = Depends(get_current_user)):
     return current_user
