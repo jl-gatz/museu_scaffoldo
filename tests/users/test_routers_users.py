@@ -29,7 +29,7 @@ def override_get_current_user():
 app.dependency_overrides[get_current_user] = override_get_current_user
 
 
-def test_create_user(client):
+def test_create_user(client: TestClient):
     jasao = {
         "username": "alice",
         "email": "alice@example.com",
@@ -44,7 +44,7 @@ def test_create_user(client):
     }
 
 
-def test_read_users(client):
+def test_read_users(client: TestClient):
     response = client.get("/")  # noqa: F811
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
@@ -74,7 +74,7 @@ def test_read_user_by_id(user_id: int, expected_name: str, should_error: bool):
         assert response.id == user_id
 
 
-def test_read_users_me(client):
+def test_read_users_me(client: TestClient):
     response = client.get("/me")  # noqa: F811
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
@@ -84,7 +84,7 @@ def test_read_users_me(client):
     }
 
 
-def test_update_user(client):
+def test_update_user(client: TestClient):
     jasao = {
         "username": "bob",
         "email": "bob@example.com",
@@ -99,7 +99,33 @@ def test_update_user(client):
     }
 
 
-def test_delete_user(client):
+def test_delete_user(client: TestClient):
     response = client.delete("/1")
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {"message": "Usuário deletado com sucesso!"}
+
+
+def test_read_user_nao_encontrado(client: TestClient):
+    response = client.get("/-1")
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {"detail": "Usuário não encontrado"}
+
+
+def test_update_user_nao_encontrado(client: TestClient):
+    jasao = {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "mynewpassword",
+    }
+    response = client.put("/-1", json=jasao)
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {"detail": "Usuário não encontrado"}
+
+
+def test_delete_user_nao_encontrado(client: TestClient):
+    response = client.delete("/-1")
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {"detail": "Usuário não encontrado"}
