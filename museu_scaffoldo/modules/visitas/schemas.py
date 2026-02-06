@@ -1,13 +1,27 @@
+import typing
 from datetime import date, datetime, timezone
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_serializer,
+    field_validator,
+)
+
+from museu_scaffoldo.modules.utils.date_util import get_current_time
+from museu_scaffoldo.modules.utils.text_util import title_case_com_excecoes
 
 
 # -----------------------------------------------------------------------------
 # 1. Base Schema
 # -----------------------------------------------------------------------------
 class VisitaBase(BaseModel):
+    # No Pydantic V2, você pode forçar o uso de TZ ciente
+    model_config = ConfigDict(from_attributes=True, timezone_aware=True)
+
     nome_grupo: str = Field(
         ...,
         min_length=3,
@@ -47,9 +61,9 @@ class VisitaBase(BaseModel):
     def formatar_nome(cls, v: str):
         """
         Padroniza o nome do grupo para Title Case e remove espaços extras.
-        Ex: '  universidade de são paulo  ' -> 'Universidade De São Paulo'
+        Ex: '  universidade de são paulo  ' -> 'Universidade de São Paulo'
         """
-        return v.strip().title()
+        return title_case_com_excecoes(v)
 
     @field_validator("image_list", "video_list")
     @classmethod
@@ -104,15 +118,34 @@ class VisitaDB(VisitaBase):
 # 3. Response Schema
 # -----------------------------------------------------------------------------
 class VisitaPublic(VisitaBase):
+    # model_config = ConfigDict(from_attributes=True)
     id: int
-    created_at: datetime = datetime.now(timezone.utc).replace(microsecond=0)
+    created_at: datetime = Field(default_factory=get_current_time)
 
-    class Config:
-        from_attributes = True
-        # Configuração extra para serializar datetime corretamente em JSON
-        json_encoders = {
-            datetime: lambda v: v.astimezone(timezone.utc).isoformat()
-        }
+    @typing.override
+    @field_serializer("created_at", "data_visita", when_used="json")
+    def serialize_utc(self, v: datetime) -> str:
+        if isinstance(v, date) and not isinstance(v, datetime):
+            raise TypeError("date não é aceito. Use datetime UTC.")
+
+        # Isso precisa permanecer no código
+        # Está desativado por conta dos problemas de asserção de tempo
+        # if v.tzinfo is None:
+        #     raise ValueError(
+        #         "created_at deve ser timezone-aware (UTC). "
+        #         "Datetime naive detectado."
+        #     )
+
+        # DEBUG para o caso do time UTC vs naive
+        # (ainda não solucionado)
+        # print(
+        #     "DEBUG:",
+        #     v,
+        #     type(v),
+        #     v.tzinfo,
+        # )
+
+        return v.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 class VisitaList(BaseModel):

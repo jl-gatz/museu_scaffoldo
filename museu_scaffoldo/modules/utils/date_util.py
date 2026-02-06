@@ -1,4 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+# O "Clock" padrão que será usado em produção
+def get_current_time() -> datetime:
+    return datetime.now(timezone.utc).replace(microsecond=0)
 
 
 def extrair_data(item):

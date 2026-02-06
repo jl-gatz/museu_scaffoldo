@@ -77,4 +77,5 @@ taskipy = "^1.14.1"
 ruff = "^0.14.14"
 pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
+freezegun = "^1.5.5"
 
