@@ -21,7 +21,8 @@ dev = [
     "ruff (>=0.14.14,<0.15.0)",
     "taskipy (>=1.14.1,<2.0.0)",
     "pytest (>=9.0.2,<10.0.0)",
-    "pytest-cov (>=7.0.0,<8.0.0)"
+    "pytest-cov (>=7.0.0,<8.0.0)",
+    "freezegun (>=1.5.5,<2.0.0)",
 ]
 
 [tool.ruff]
@@ -76,4 +77,5 @@ taskipy = "^1.14.1"
 ruff = "^0.14.14"
 pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
+freezegun = "^1.5.5"
 
