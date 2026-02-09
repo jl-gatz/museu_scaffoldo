@@ -5,7 +5,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
 from museu_scaffoldo.modules.equipamentos import routers
-from museu_scaffoldo.modules.equipamentos.routers import read_equipamento_by_id
+from museu_scaffoldo.modules.equipamentos.routers import (
+    read_equipamento_by_id,
+    read_equipamento_by_nome,
+)
 
 app = FastAPI()
 app.include_router(routers.router_equipamento)
@@ -85,6 +88,35 @@ def test_read_equip_by_id(
         response = read_equipamento_by_id(equip_id)
         assert response.marca == expected_marca
         assert response.id == equip_id
+
+
+@pytest.mark.parametrize(
+    ("search_marca_model", "should_error"),
+    [("IBM", False), ("Cobra", True), ("XPTO", True)],
+)
+def test_read_equip_by_marca_modelo(
+    search_marca_model: str, should_error: bool
+):
+    print(f"Busca por: '{search_marca_model}' (Deve dar erro? {should_error})")
+
+    if should_error:
+        with pytest.raises(HTTPException) as excinfo:
+            read_equipamento_by_nome(search_marca_model)
+
+        assert excinfo.value.status_code == HTTPStatus.NOT_FOUND
+        assert excinfo.value.detail == "Marca ou modelo não encontrado"
+    else:
+        response = read_equipamento_by_nome(search_marca_model)
+        lista_equipamentos = response["equipamentos"]
+        print(f"Equipamentos encontrados: {lista_equipamentos}")
+
+        # Verifica se a lista não está vazia
+        for equip in lista_equipamentos:
+            assert len(lista_equipamentos) > 0
+            assert (
+                search_marca_model.lower() in equip.marca.lower()
+                or search_marca_model.lower() in equip.modelo.lower()
+            )
 
 
 def test_update_equipamento(client: TestClient):

@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from museu_scaffoldo.modules.equipamentos.schemas import (
     EquipamentoBase,
     EquipamentoDB,
+    EquipamentoList,
     EquipamentoPublic,
     Message,
 )
@@ -15,7 +16,7 @@ router_equipamento = APIRouter()
 database = []
 
 
-@router_equipamento.get("/")
+@router_equipamento.get("/", response_model=EquipamentoList)
 def read_equipamentos():
     return {"equipamentos": database}
 
@@ -32,6 +33,27 @@ def read_equipamento_by_id(equip_id: int):
     user_with_id = database[equip_id - 1]
 
     return user_with_id
+
+
+# GET equipamentos por nome ou marca, usando query params ou path params
+@router_equipamento.get(
+    "/search/{marca_ou_modelo}",
+    status_code=HTTPStatus.OK,
+    response_model=EquipamentoList,
+)
+def read_equipamento_by_nome(marca_ou_modelo: str):
+    equipamentos_encontrados = [
+        equip
+        for equip in database
+        if marca_ou_modelo.lower() in equip.marca.lower()
+        or marca_ou_modelo.lower() in equip.modelo.lower()
+    ]
+    if not equipamentos_encontrados:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Marca ou modelo não encontrado",
+        )
+    return {"equipamentos": equipamentos_encontrados}
 
 
 @router_equipamento.post(
