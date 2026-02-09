@@ -149,7 +149,8 @@ def test_read_visita_by_id(
 
 def test_update_visita(client: TestClient):
     jasao = {
-        "nome_grupo": "Escola Estadual e Cordão de Samba Rock B Negão E os seletores de frequência",
+        "nome_grupo": "Escola Estadual e Cordão de Samba Rock B Negão "
+        "E os seletores de frequência",
         "data_visita": "2024-10-15T14:30:00Z",
         "descricao": "Trampo técnico, mezzo aliche mezzo catupiry",
         "image_list": [
@@ -168,7 +169,8 @@ def test_update_visita(client: TestClient):
 
     assert response.status_code == HTTPStatus.OK
     assert payload_limpo == {
-        "nome_grupo": "Escola Estadual e Cordão de Samba Rock B Negão e os Seletores de Frequência",
+        "nome_grupo": "Escola Estadual e Cordão de Samba Rock B Negão "
+        "e os Seletores de Frequência",
         "data_visita": "2024-10-15T14:30:00Z",
         "descricao": "Trampo técnico, mezzo aliche mezzo catupiry",
         "image_list": [
@@ -195,7 +197,8 @@ def test_read_visita_nao_encontrada(client: TestClient):
 
 def test_update_visita_nao_encontrada(client: TestClient):
     jasao = {
-        "nome_grupo": "Escola Estadual e Cordão de Samba Rock B Negão E os seletores de frequência",
+        "nome_grupo": "Escola Estadual e Cordão de Samba Rock B Negão "
+        "E os seletores de frequência",
         "data_visita": "2024-10-15T14:30:00Z",
         "descricao": "Trampo técnico, mezzo aliche mezzo catupiry",
         "image_list": [
