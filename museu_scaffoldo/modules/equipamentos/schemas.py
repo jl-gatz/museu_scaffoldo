@@ -117,7 +117,7 @@ class EquipamentoPublic(EquipamentoBase):
 
 
 class EquipamentoList(BaseModel):
-    equipamentos: list[EquipamentoPublic]
+    equipamentos: List[EquipamentoPublic]
 
 
 class Message(BaseModel):
