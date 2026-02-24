@@ -1,88 +1,81 @@
+from functools import lru_cache
 from http import HTTPStatus
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends
 
+from museu_scaffoldo.modules.equipamentos.repository import (
+    EquipamentoRepository,
+)
 from museu_scaffoldo.modules.equipamentos.schemas import (
     EquipamentoBase,
-    EquipamentoDB,
     EquipamentoList,
     EquipamentoPublic,
     Message,
 )
+from museu_scaffoldo.modules.equipamentos.service import EquipamentoService
 
 router_equipamento = APIRouter()
 
-# Teste com database falso
-database = []
+
+# Dependência para injeção
+@lru_cache
+def get_repository() -> EquipamentoRepository:
+    """Singleton do repositório para a aplicação."""
+    return EquipamentoRepository()
+
+
+async def get_service(
+    repo: EquipamentoRepository = Depends(get_repository),
+) -> EquipamentoService:
+    return EquipamentoService(repo)
 
 
 @router_equipamento.get("/", response_model=EquipamentoList)
-def read_equipamentos():
-    return {"equipamentos": database}
+async def read_equipamentos(
+    service: EquipamentoService = Depends(get_service),
+):
+    equipamentos = await service.get_all_equipamentos()
+    return {"equipamentos": equipamentos}
 
 
-@router_equipamento.get(
-    "/{equip_id}", status_code=HTTPStatus.OK, response_model=EquipamentoPublic
-)
-def read_equipamento_by_id(equip_id: int):
-    if equip_id > len(database) or equip_id < 1:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="Equipamento não encontrado",
-        )
-    user_with_id = database[equip_id - 1]
-
-    return user_with_id
+@router_equipamento.get("/{equip_id}", response_model=EquipamentoPublic)
+async def read_equipamento_by_id(
+    equip_id: int, service: EquipamentoService = Depends(get_service)
+):
+    return await service.get_equipamento_by_id(equip_id)
 
 
 # GET equipamentos por nome ou marca, usando query params ou path params
 @router_equipamento.get(
-    "/search/{marca_ou_modelo}",
-    status_code=HTTPStatus.OK,
-    response_model=EquipamentoList,
+    "/search/{marca_ou_modelo}", response_model=EquipamentoList
 )
-def read_equipamento_by_nome(marca_ou_modelo: str):
-    equipamentos_encontrados = [
-        equip
-        for equip in database
-        if marca_ou_modelo.lower() in equip.marca.lower()
-        or marca_ou_modelo.lower() in equip.modelo.lower()
-    ]
-    if not equipamentos_encontrados:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="Marca ou modelo não encontrado",
-        )
-    return {"equipamentos": equipamentos_encontrados}
+async def read_equipamentos_by_nome(
+    marca_ou_modelo: str, service: EquipamentoService = Depends(get_service)
+):
+    equipamentos = await service.search_equipamentos(marca_ou_modelo)
+    return {"equipamentos": equipamentos}
 
 
 @router_equipamento.post(
     "/", status_code=HTTPStatus.CREATED, response_model=EquipamentoPublic
 )
-def create_equipamento(equip: EquipamentoBase):
-    equip_with_id = EquipamentoDB(**equip.model_dump(), id=len(database) + 1)
-    database.append(equip_with_id)
-    return equip_with_id
+async def create_equipamento(
+    equip: EquipamentoBase, service: EquipamentoService = Depends(get_service)
+):
+    return await service.create_equipamento(equip)
 
 
 @router_equipamento.put("/{equip_id}", response_model=EquipamentoPublic)
-def update_user(equip_id: int, equip: EquipamentoBase):
-    if equip_id > len(database) or equip_id < 1:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="Equipamento não encontrado",
-        )
-    user_with_id = EquipamentoDB(**equip.model_dump(), id=equip_id)
-    database[equip_id - 1] = user_with_id
-    return user_with_id
+async def update_equipamento(
+    equip_id: int,
+    equip: EquipamentoBase,
+    service: EquipamentoService = Depends(get_service),
+):
+    return await service.update_equipamento(equip_id, equip)
 
 
 @router_equipamento.delete("/{equip_id}", response_model=Message)
-def delete_user(equip_id: int):
-    if equip_id > len(database) or equip_id < 1:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="Equipamento não encontrado",
-        )
-    del database[equip_id - 1]
-    return {"message": "Equipamento deletado com sucesso!"}
+async def delete_equipamento(
+    equip_id: int, service: EquipamentoService = Depends(get_service)
+):
+    return await service.delete_equipamento(equip_id)
